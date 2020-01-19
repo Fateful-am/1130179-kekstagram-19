@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Алексей Мальцев](https://up.htmlacademy.ru/javascript/19/user/1130179).
-* Наставник: `Неизвестно`.
+* Наставник: [Андрей Лутогин](https://htmlacademy.ru/profile/id1096725).
 
 ---
 
