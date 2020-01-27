@@ -10,22 +10,34 @@ var commentMessages = [
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 // Имена коментаторов
-var names = ['Иван', 'Хуан Себастьян', 'Мария', 'Кристоф', 'Виктор', 'Юлия', 'Люпита', 'Вашингтон',
-  'да Марья', 'Верон', 'Мирабелла', 'Вальц', 'Онопко', 'Топольницкая', 'Нионго', 'Ирвинг'
+var names = ['Иван',
+  'Хуан Себастьян',
+  'Мария',
+  'Кристоф',
+  'Виктор',
+  'Юлия',
+  'Люпита',
+  'Вашингтон',
+  'да Марья',
+  'Верон',
+  'Мирабелла',
+  'Вальц',
+  'Онопко',
+  'Топольницкая',
+  'Нионго',
+  'Ирвинг'
 ];
 
 // Количество случайных данных для моки
-var photoCount = 25;
+var PHOTO_COUNT = 25;
 // Минимальное кол-во лайков
-var minLikesCount = 15;
+var MIN_LIKES_COUNT = 15;
 // Максимальное кол-во лайков
-var maxLikesCount = 200;
+var MAX_LIKES_COUNT = 200;
 // Максимальное кол-во комментариев
-var maxCommentsCount = 7;
+var MAX_COMMENTS_COUNT = 7;
 // Кол-во доступных аватарок
-var commentatorsAvatarCount = 6;
-// Массив индексов для заполнения случайными данными
-var indexes = [];
+var COMMENTATORS_AVATAR_COUNT = 6;
 
 /**
  * Возвращает случайный элемент массива
@@ -45,26 +57,23 @@ function getRandomArraysElement(array, doRemove) {
 
 /**
  * Возвращает случайное сообщение
+ * @param {number} minMessageCount Минимальное кол-во сообщений (по умолчанию - 1)
+ * @param {number} maxMessageCount Максимальное кол-во сообщений (по умолчанию - 2)
  * @return {string}
  */
-function getCommentMessage() {
-  // Минимальное кол-во сообщений
-  var minMessageCount = 1;
-  // Максимальное кол-во сообщений
-  var maxMessageCount = 2;
+function getCommentMessage(minMessageCount, maxMessageCount) {
+  minMessageCount = minMessageCount || 1;
+  maxMessageCount = maxMessageCount || 2;
   // Число сообщениий
   var messageCount = minMessageCount + Math.floor(Math.random() * maxMessageCount);
   // Возвращаемое сообщение
   var message = '';
 
   for (var k = 1; k <= messageCount; k++) {
-    if (k > 1) {
-      message += ' ';
-    }
-    message += getRandomArraysElement(commentMessages, false);
+    message += getRandomArraysElement(commentMessages, false) + ' ';
   }
 
-  return message;
+  return message.trim();
 }
 
 /**
@@ -73,13 +82,13 @@ function getCommentMessage() {
  */
 function getComments() {
   var comments = [];
-  var commentsCount = Math.floor(Math.random() * maxCommentsCount);
+  var commentsCount = Math.floor(Math.random() * MAX_COMMENTS_COUNT);
   for (var j = 0; j < commentsCount; j++) {
     var comment = {};
     // Аватарка автора комментрия
-    comment.avatar = 'img/avatar-' + Math.floor(Math.random() * commentatorsAvatarCount + 1) + '.svg';
+    comment.avatar = 'img/avatar-' + Math.floor(Math.random() * COMMENTATORS_AVATAR_COUNT + 1) + '.svg';
     // Сообщение коментатора
-    comment.message = getCommentMessage();
+    comment.message = getCommentMessage(1, 2);
     // Имя комментатора
     comment.name = getRandomArraysElement(names, false);
     comments.push(comment);
@@ -90,9 +99,12 @@ function getComments() {
 
 /**
  * Возвращает объект описания фотографии
+ * @param {Array} indexes Массив с индексами фотографий
+ * @param {Number} minLikesCount Минимальное кол-во лайков
+ * @param {Number} maxLikesCount Максимальное кол-во лайков
  * @return {{comments: Array, description: string, url: string, likes: number}}
  */
-function getRandomPhotoDescription() {
+function getRandomPhotoDescription(indexes, minLikesCount, maxLikesCount) {
   return {
     // путь к фотографии
     url: 'photos/' + getRandomArraysElement(indexes, true) + '.jpg',
@@ -106,17 +118,24 @@ function getRandomPhotoDescription() {
 }
 
 /**
- *
- * @param {number} count количество фотографий для показа
+ * Возвращает массив объектов с описаниями фотографий
+ * @param {number} photoCount кол-во фотографий
  * @return {Array}
  */
-function getPhotoDescriptions(count) {
-  var photoDescriptions = [];
-  for (var n = 0; n < count; n++) {
-    photoDescriptions.push(getRandomPhotoDescription());
+function getPhotoDescriptions(photoCount) {
+  // Массив индексов для заполнения случайными данными
+  var indexes = [];
+  // Заполнение массива индексов
+  for (var i = 1; i <= photoCount; i++) {
+    indexes.push(i);
+  }
+  // Возвращаемый массив описаний фотографий
+  var returnArray = [];
+  for (var n = 0; n < photoCount; n++) {
+    returnArray.push(getRandomPhotoDescription(indexes, MIN_LIKES_COUNT, MAX_LIKES_COUNT));
   }
 
-  return photoDescriptions;
+  return returnArray;
 }
 
 /**
@@ -139,15 +158,11 @@ function renderPicture(picture) {
 
 /**
  * Отрисовка всех фотографий
+ * @param {Array} photoDescriptions массив объектов сописанием фотографий
  */
-function renderPictures() {
-  // Заполнение массива индексов
-  for (var i = 1; i <= photoCount; i++) {
-    indexes.push(i);
-  }
+function renderPictures(photoDescriptions) {
 
   // массив объектов фотографий
-  var photoDescriptions = getPhotoDescriptions(photoCount);
   // Фрагмент для вставки
   var fragment = document.createDocumentFragment();
   for (var p = 0; p < photoDescriptions.length; p++) {
@@ -159,4 +174,7 @@ function renderPictures() {
   similarListElement.appendChild(fragment);
 }
 
-renderPictures();
+// массив объектов фотографий
+var photoDescriptions = getPhotoDescriptions(PHOTO_COUNT);
+// Отрисовка массива описаний фотографий
+renderPictures(photoDescriptions);
