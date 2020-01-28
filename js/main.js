@@ -40,6 +40,19 @@ var MAX_COMMENTS_COUNT = 7;
 var COMMENTATORS_AVATAR_COUNT = 6;
 
 /**
+ * Включение и выключение видимости элемента
+ * @param {Element} element элемент для которого переключается видимость
+ * @param {boolean} isVisible Признак видимости элемента
+ */
+function visibleToggle(element, isVisible) {
+  if (isVisible) {
+    element.classList.remove('hidden');
+  } else {
+    element.classList.add('hidden');
+  }
+}
+
+/**
  * Возвращает случайный элемент массива
  * @param {Array} array Входной массив
  * @param {boolean} doRemove Удалить или нет элемент массива
@@ -174,7 +187,85 @@ function renderPictures(photoDescriptions) {
   similarListElement.appendChild(fragment);
 }
 
+/**
+ * Возвращает отрисованный комментарий
+ * @param {Element} list Список-контейнер для комментариев
+ * @param {Object} comment Объект с данными о коментарии
+ * @return {HTMLLIElement} член списка с комментарием
+ */
+function renderComment(list, comment) {
+  // член списка с комментарием
+  var socialComment = document.createElement('li');
+  socialComment.classList.add('social__comment');
+  // Аватар коментатора
+  var socialPicture = document.createElement('img');
+  socialPicture.classList.add('social__picture');
+  socialPicture.src = comment.avatar;
+  socialPicture.alt = comment.name;
+  socialPicture.width = 35;
+  socialPicture.height = 35;
+  socialComment.appendChild(socialPicture);
+  // Текст комментария
+  var socialText = document.createElement('p');
+  socialText.classList.add('social__text');
+  socialText.textContent = comment.message;
+  socialComment.appendChild(socialText);
+  return socialComment;
+}
+
+/**
+ * Показывает полноэкранную фотографию на основе объекта Описание фотографии
+ * @param {Object} photoDescription Объект с данными о фотографии
+ * @param {Element} bigPictureElement Элемент-контейнер для показа большой фотографии
+ */
+function showBigPicture(photoDescription, bigPictureElement) {
+  // Показываем контейнер для полноэкранной фотографии
+  visibleToggle(bigPictureElement, true);
+  // Выключаем видимость счетчика коментариев
+  visibleToggle(document.querySelector('.social__comment-count'), false);
+  // Выключаем видимость кнопки загрузки новых комментариев
+  visibleToggle(document.querySelector('.comments-loader'), false);
+  // Убираем прокрутку контейнера фотографий позади при скролле
+  document.body.classList.add('modal-open');
+
+  // Заменяем информацию для выбранной фотографии
+  // url фотографии
+  bigPictureElement.querySelector('img').src = photoDescription.url;
+  // Кол-во лайков
+  bigPictureElement.querySelector('.likes-count').textContent = photoDescription.likes;
+  // Кол-во комментариев
+  bigPictureElement.querySelector('.comments-count').textContent = photoDescription.comments.length.toString();
+  // Описание фоторафии
+  bigPictureElement.querySelector('.social__caption').textContent = photoDescription.description;
+
+  // Список с коментариями
+  var socialComments = bigPictureElement.querySelector('.social__comments');
+  if (socialComments) {
+    // Очистка предыдущих комментариев
+    while (socialComments.firstChild) {
+      socialComments.removeChild(socialComments.firstChild);
+    }
+
+    // Фрагмент для вставки
+    var fragment = document.createDocumentFragment();
+    // Генерация комментариев
+    for (var li = 0; li < photoDescription.comments.length; li++) {
+      fragment.appendChild(renderComment(socialComments, photoDescription.comments[li]));
+    }
+
+    socialComments.appendChild(fragment);
+  }
+}
+
 // массив объектов фотографий
 var photoDescriptions = getPhotoDescriptions(PHOTO_COUNT);
 // Отрисовка массива описаний фотографий
 renderPictures(photoDescriptions);
+
+// Контейнер для отрисовки полноэкранной фотографии и инфомации о ней
+var bigPicture = document.querySelector('.big-picture');
+
+// Показ большой фотографии (по заданию 0 индекс)
+if (bigPicture && photoDescriptions.length > 0) {
+  showBigPicture(photoDescriptions[0], bigPicture);
+}
