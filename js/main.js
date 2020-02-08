@@ -368,8 +368,7 @@ function setFilterValue(filterClassId, filterValue) {
   if (filterClassId === DEFAULT_EFFECT) {
     imgUploadPreview.style.fiter = '';
   } else {
-    var f = filterOption[filterClassId].filter(filterValue);
-    imgUploadPreview.style.filter = f;
+    imgUploadPreview.style.filter = filterOption[filterClassId].filter(filterValue);
   }
   effectLevelValue.value = parseInt(filterValue * 100, 10);
 }
@@ -398,6 +397,24 @@ function changeScale(isIncrease) {
 }
 
 /**
+ * Проверяет отдельно взятый тэг на валидность
+ * @param {String} hashTag Хэштэг
+ * @return {string} В случае валидности хэштэга возвращает пустую строку, иначе строку ошибки
+ */
+function getHashTagValidityString(hashTag) {
+  if (hashTag.slice(0, 1) !== '#') {
+    return 'Хэштэг должен начинаться с символа #';
+  } else if (hashTag.length === 1) {
+    return 'Хэштэг не может быть пустым';
+  } else if (hashTag.length > MAX_HASHTAG_LENGTH) {
+    return 'Максимальная длина хэштэга: ' + MAX_HASHTAG_LENGTH + ' (' + hashTag + ')';
+  } else if (hashTag.match('#[a-zA-Zа-яА-Я0-9]*')[0] !== hashTag) {
+    return 'Хэштэг должен содержать только буквы и числа';
+  }
+  return '';
+}
+
+/**
  * Проверяет валидность ввода строки тэгов
  * @param {string} hashTagStr проверяемая строка с хэштэгами
  * @return {string} строка с сообщением об ошибке
@@ -406,30 +423,28 @@ function checkHashTags(hashTagStr) {
   if (hashTagStr.length === 0) {
     return '';
   }
+  // Массив хэштэтов
   var hashTags = hashTagStr.split(' ');
-  var hashTag;
+  // Строка валидности хэштэга
+  var validityString;
+  // Массив уникальных хэштэгов
   var uniqHashtags = [];
+  // Хэштэг в верхнем регистре
   var upperHashTag;
   for (var i = 0; i < hashTags.length; i++) {
-    hashTag = hashTags[i];
-    if (hashTag.slice(0, 1) !== '#') {
-      return 'Хэштэг должен начинаться с символа #';
-    } else if (hashTag.length === 1) {
-      return 'Хэштэг не может быть пустым';
-    } else if (hashTag.length > MAX_HASHTAG_LENGTH) {
-      return 'Максимальная длина хэштэга: ' + MAX_HASHTAG_LENGTH + ' (' + hashTag + ')';
-    } else if (hashTag.match('#[a-zA-Zа-яА-Я0-9]*')[0] !== hashTag) {
-      return 'Хэштэг должен содержать только буквы и числа';
-    } else {
-      upperHashTag = hashTag.toUpperCase();
+    validityString = getHashTagValidityString(hashTags[i]);
+    if (!validityString) {
+      upperHashTag = hashTags[i].toUpperCase();
       if (uniqHashtags.includes(upperHashTag)) {
-        return 'Хэштэги не должны повторяться (' + hashTag + ')';
+        return 'Хэштэги не должны повторяться (' + hashTags[i] + ')';
       }
       uniqHashtags.push(upperHashTag);
+    } else {
+      return validityString;
     }
   }
   if (uniqHashtags.length > MAX_HASHTAG_COUNT) {
-    return 'Максимальное еоличество хэштэгов: ' + MAX_HASHTAG_COUNT;
+    return 'Максимальное количество хэштэгов: ' + MAX_HASHTAG_COUNT;
   }
   return '';
 }
@@ -473,9 +488,9 @@ function textReportValidity(textElement) {
 function onUploadFileInputChange(evt) {
   if (evt.target.value === '') {
     closeImgUploadForm();
-  } else {
-    openImgUploadForm();
+    return;
   }
+  openImgUploadForm();
 }
 
 /**
