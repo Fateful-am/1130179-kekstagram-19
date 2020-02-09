@@ -315,13 +315,13 @@ function renderPicture(picture) {
 
 /**
  * Отрисовка всех фотографий
- * @param {Array} photoDescriptions массив объектов с описанием фотографий
+ * @param {Array} photoDescriptionsArray массив объектов с описанием фотографий
  */
-function renderPictures(photoDescriptions) {
+function renderPictures(photoDescriptionsArray) {
   // Фрагмент для вставки
   var fragment = document.createDocumentFragment();
-  for (var p = 0; p < photoDescriptions.length; p++) {
-    fragment.appendChild(renderPicture(photoDescriptions[p]));
+  for (var p = 0; p < photoDescriptionsArray.length; p++) {
+    fragment.appendChild(renderPicture(photoDescriptionsArray[p]));
   }
 
   // Элемент в который будем вставлять фотографии
