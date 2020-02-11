@@ -68,6 +68,7 @@
     socialText.classList.add('social__text');
     socialText.textContent = comment.message;
     socialComment.appendChild(socialText);
+
     return socialComment;
   }
 

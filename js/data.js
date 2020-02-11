@@ -25,13 +25,13 @@
     // Число сообщениий
     var messageCount = minMessageCount + Math.floor(Math.random() * maxMessageCount);
     // Возвращаемое сообщение
-    var message = '';
+    var message = [];
 
     for (var k = 1; k <= messageCount; k++) {
-      message += window.utils.getRandomArraysElement(window.settings.commentMessages, false) + ' ';
+      message.push(window.utils.getRandomArraysElement(window.settings.commentMessages, false));
     }
 
-    return message.trim();
+    return message.join(' ');
   }
 
   /**

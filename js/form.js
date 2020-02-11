@@ -83,6 +83,7 @@
   function onUploadFileInputChange(evt) {
     if (evt.target.value === '') {
       closeImgUploadForm();
+
       return;
     }
     openImgUploadForm();
@@ -137,7 +138,6 @@
     // позиция слайдера
     var sliderPosition = target.offsetLeft / parentTarget.offsetWidth;
     setFilterValue(currentFilterId, sliderPosition);
-    // console.log(imgUploadPreview.style);
   }
 
   /**
@@ -188,15 +188,19 @@
    * @param {string} filterClassName имя класса
    */
   function setFilterClass(filterClassName) {
+    // Удаление всех лишних классов (если таковые устновлены), кроме установленного в разметке по умолчанию
     for (var i = 1; i < imgUploadPreview.className.length; i++) {
       imgUploadPreview.classList.remove(imgUploadPreview.classList[1]);
     }
-    if (filterClassName !== window.settings.DEFAULT_EFFECT) {
-      imgUploadPreview.classList.add(filterOption[filterClassName].previewClass);
-      window.utils.visibleToggle(fieldSetEffectLevel, true);
+
+    if (filterClassName === window.settings.DEFAULT_EFFECT) {
+      window.utils.visibleToggle(fieldSetEffectLevel, false);
       return;
     }
-    window.utils.visibleToggle(fieldSetEffectLevel, false);
+    imgUploadPreview.classList.add(filterOption[filterClassName].previewClass);
+    window.utils.visibleToggle(fieldSetEffectLevel, true);
+
+    return;
   }
 
   /**
@@ -252,9 +256,10 @@
       return 'Хэштэг не может быть пустым';
     } else if (hashTag.length > window.settings.MAX_HASHTAG_LENGTH) {
       return 'Максимальная длина хэштэга: ' + window.settings.MAX_HASHTAG_LENGTH + ' (' + hashTag + ')';
-    } else if (hashTag.match('#[a-zA-Zа-яА-Я0-9]*')[0] !== hashTag) {
+    } else if (hashTag.match(/#[a-zA-Zа-яА-Я0-9]*/)[0] !== hashTag) {
       return 'Хэштэг должен содержать только буквы и числа';
     }
+
     return '';
   }
 
@@ -277,25 +282,30 @@
     var upperHashTag;
     for (var i = 0; i < hashTags.length; i++) {
       validityString = getHashTagValidityString(hashTags[i]);
-      if (!validityString) {
-        upperHashTag = hashTags[i].toUpperCase();
-        if (uniqHashtags.includes(upperHashTag)) {
-          return 'Хэштэги не должны повторяться (' + hashTags[i] + ')';
-        }
-        uniqHashtags.push(upperHashTag);
-      } else {
+      if (validityString) {
         return validityString;
       }
+
+      // Если отдельный хэштэг прошел проверку, проверяем на уникальность
+      upperHashTag = hashTags[i].toUpperCase();
+      if (uniqHashtags.includes(upperHashTag)) {
+        return 'Хэштэги не должны повторяться (' + hashTags[i] + ')';
+      }
+
+      uniqHashtags.push(upperHashTag);
     }
+
+    // Если все хэштэги прошли проверку, проверям на разрешенное количество
     if (uniqHashtags.length > window.settings.MAX_HASHTAG_COUNT) {
       return 'Максимальное количество хэштэгов: ' + window.settings.MAX_HASHTAG_COUNT;
     }
+
     return '';
   }
 
   /**
    * Проверяет валидность ввода описания картинки
-   * @param {string}descriptionStr проверяемая строка с описанием
+   * @param {string} descriptionStr проверяемая строка с описанием
    * @return {string} строка с сообщением об ошибке
    */
   function checkDescription(descriptionStr) {
@@ -304,6 +314,7 @@
     } else if (descriptionStr.length > window.settings.MAX_DESCRIPTION_LENGTH) {
       return 'Максимальная длина описания: ' + window.settings.MAX_DESCRIPTION_LENGTH;
     }
+
     return '';
   }
 

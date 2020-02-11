@@ -19,6 +19,7 @@
     if (evt.target.pictureObject) {
       // Эмуляция клика по картинке
       window.preview.showBigPicture(evt.target.pictureObject);
+
       return;
     }
     window.preview.showBigPicture(evt.target.parentNode.pictureObject);
