@@ -73,7 +73,7 @@
 
   // Интерфейс модуля
   window.form = {
-
+    setFilterValue: setFilterValue // Присваивает насыщенность фильтра
   };
 
   /**
@@ -121,23 +121,9 @@
    * @param {Event} evt
    */
   function onFilterChange(evt) {
-    setFilterValue(evt.target.id, 1);
-    setFilterClass(evt.target.id);
     currentFilterId = evt.target.id;
-  }
-
-  /**
-   * Обработчик отпускания кнопки мыши на слайдере
-   * @param {Event} evt
-   */
-  function onSliderMouseUp(evt) {
-    // слайдер
-    var target = evt.target;
-    // родитель слайдера
-    var parentTarget = evt.target.parentElement;
-    // позиция слайдера
-    var sliderPosition = target.offsetLeft / parentTarget.offsetWidth;
-    setFilterValue(currentFilterId, sliderPosition);
+    setFilterValue(1);
+    setFilterClass(evt.target.id);
   }
 
   /**
@@ -205,16 +191,18 @@
 
   /**
    * Присваивает насыщенность фильтра
-   * @param {string} filterClassId id класса
    * @param {number} filterValue [0..1] насыщенность фильтра в долях
    */
-  function setFilterValue(filterClassId, filterValue) {
-    if (filterClassId === window.settings.DEFAULT_EFFECT) {
+  function setFilterValue(filterValue) {
+    if (currentFilterId === window.settings.DEFAULT_EFFECT) {
       imgUploadPreview.style.fiter = '';
     } else {
-      imgUploadPreview.style.filter = filterOption[filterClassId].filter(filterValue);
+      imgUploadPreview.style.filter = filterOption[currentFilterId].filter(filterValue);
     }
     effectLevelValue.value = parseInt(filterValue * 100, 10);
+    effectLevelPin.style.left = filterValue * 100 + '%';
+    effectLevelDepth.style.width = filterValue * 100 + '%';
+
   }
 
   /**
@@ -321,10 +309,9 @@
   function setDefaultState(clearUploadFileInputValue) {
     currentFilterId = window.settings.DEFAULT_EFFECT;
     setFilterClass(window.settings.DEFAULT_EFFECT);
-    setFilterValue(window.settings.DEFAULT_EFFECT, 1);
+    currentFilterId = window.settings.DEFAULT_EFFECT;
     // слайдер на 100%
-    effectLevelPin.style.left = '100%';
-    effectLevelDepth.style.width = '100%';
+    setFilterValue(1);
     // По умолчанию выставляем без фильтров
     imgUploadOverlay.querySelector('#' + window.settings.DEFAULT_EFFECT).checked = true;
     setImageScale(window.settings.DEFAULT_SCALE);
@@ -350,8 +337,6 @@
     imgUploadCancel.addEventListener('click', onClickCloseUploadForm);
     // Добавляем обработчик переключения фильтров
     effectList.addEventListener('change', onFilterChange);
-    // Добавляем обработчик отпускания кнопки мыши на слайдере
-    effectLevelPin.addEventListener('mouseup', onSliderMouseUp);
     // Добавляем обработчик клика на уменьшение масштаба
     scaleControlSmaller.addEventListener('click', onScaleDecreaseClick);
     // Добавляем обработчик клика на увеличение масштаба
@@ -377,7 +362,6 @@
     document.removeEventListener('keydown', onUploadFormKeyDown);
     imgUploadCancel.removeEventListener('click', onClickCloseUploadForm);
     effectList.removeEventListener('change', onFilterChange);
-    effectLevelPin.removeEventListener('mouseup', onSliderMouseUp);
     scaleControlSmaller.removeEventListener('click', onScaleDecreaseClick);
     scaleControlBigger.removeEventListener('click', onScaleIncreaseClick);
     textHashtags.removeEventListener('input', onTextHashTagsInput);
