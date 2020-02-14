@@ -90,16 +90,19 @@
     document.addEventListener('keydown', onBigPictureKeyDown);
     // Добавляем обработчик клика по кнопке закрытия
     pictureCancel.addEventListener('click', oncloseBigPictureClick);
-
+    // Разделяем описания картинок от хэштэгов
+    var descriptionPart = photoDescription.description.match(/(?:[^#])*/);
     // Заменяем информацию для выбранной фотографии
     // url фотографии
     bigPicture.querySelector('img').src = photoDescription.url;
+    // альтернативное описание фотографии
+    bigPicture.querySelector('img').alt = descriptionPart;
     // Кол-во лайков
     bigPicture.querySelector('.likes-count').textContent = photoDescription.likes;
     // Кол-во комментариев
     bigPicture.querySelector('.comments-count').textContent = photoDescription.comments.length.toString();
     // Описание фоторафии
-    bigPicture.querySelector('.social__caption').textContent = photoDescription.description;
+    bigPicture.querySelector('.social__caption').textContent = descriptionPart;
 
     // Список с коментариями
     var socialComments = bigPicture.querySelector('.social__comments');
