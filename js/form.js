@@ -36,6 +36,10 @@
   var effectLevelValue = imgUploadOverlay.querySelector('.effect-level__value');
   // текущий выбранный фильтр
   var currentFilterId;
+  // Элемент с сообщением отправки формы
+  var messageSection;
+  // Кнопка закрытия диалога с сообщением
+  var closeMessageButton;
 
   // Объект настроек фильтров {id фильтра: {класс картинки предпросмотра, строка инлайн фильтра}}
   var filterOption = {
@@ -154,6 +158,107 @@
   function onTextDescriptionInput() {
     textDescription.setCustomValidity(checkDescription(textDescription.value));
     textReportValidity(textDescription);
+  }
+
+  /**
+   * Обработка события удачной отправки данных на сервер
+   */
+  function onSuccessSaveData() {
+    // window.index.closeSetupDialogActions();
+    closeImgUploadForm();
+    messageSection = uploadMessage('success', 'Изображение успешно загружено');
+  }
+
+  /**
+   * Обработка ошибочного события отправки данных на сервер
+   * @param {String} errorMessage Сообщение об ошибке при загрузке данных с сервера
+   */
+  function onErrorSaveData(errorMessage) {
+    closeImgUploadForm();
+    messageSection = uploadMessage('error', errorMessage);
+  }
+
+  /**
+   * Обработка отправки формы
+   * @param {Event} evt
+   */
+  function onSetupFormSubmit(evt) {
+    evt.preventDefault();
+    var xhrErrorMessage = document.querySelector('.xhr-error-message');
+    if (xhrErrorMessage) {
+      xhrErrorMessage.remove();
+    }
+    window.backend.save(window.settings.FORM_SEND_URL, new FormData(formUploadImage), onSuccessSaveData, onErrorSaveData);
+  }
+
+  /**
+   * Действия необходимые при закрытии окна сообщения
+   */
+  function closeMessage() {
+    // Удаляем обработчики закрытия окна сообщения
+    document.removeEventListener('click', onMessageCloseClick);
+    document.removeEventListener('keydown', onMessageCloseKeydown);
+    // Удаляем секцию с сообщением
+    messageSection.remove();
+  }
+
+  /**
+   * Добавляем обработчики закрытия окна сообщения по клику по кнопке
+   */
+  function onMessageCloseButtonClick() {
+    closeMessage();
+  }
+
+  /**
+   * Добавляем обработчики закрытия окна сообщения по клику вне окна сообщения
+   * @param {Event} evt
+   */
+  function onMessageCloseClick(evt) {
+    if (evt.target === messageSection) {
+      closeMessage();
+    }
+  }
+
+  /**
+   * Добавляем обработчики закрытия окна сообщения по нажатию Esc и Enter
+   * @param {KeyboardEvent} evt
+   */
+  function onMessageCloseKeydown(evt) {
+    // Закрытие окна по Esc
+    window.utils.processEscAction(evt, closeMessage);
+    // Закрытие окна по Enter на элементе
+    if (evt.target === closeMessageButton) {
+      window.utils.processEnterAction(evt, closeMessage, true);
+    }
+  }
+
+  /**
+   * Клонируем и рендерим сообщение о загрузке файла
+   * @param {String} templateId Id шаблона
+   * @param {String} infoMessage Сообщение для отображения
+   * @return {Node}
+   */
+  function uploadMessage(templateId, infoMessage) {
+    // Шаблон для сообщения
+    var messageTemplate = document.querySelector('#' + templateId)
+      .content
+      .querySelector('.' + templateId);
+    // Клонируем секцию из шаблона
+    var messageElement = messageTemplate.cloneNode(true);
+    messageElement.querySelector('.' + templateId + '__title').textContent = infoMessage;
+    // Кнопка закрытия сообщения
+    closeMessageButton = messageElement.querySelector('.' + templateId + '__button');
+
+    // Добавляем обработчики закрытия окна сообщения
+    // по клику по кнопке
+    closeMessageButton.addEventListener('click', onMessageCloseButtonClick);
+    // по клику вне окна сообщения
+    document.addEventListener('click', onMessageCloseClick);
+    // по нажатию Esc
+    document.addEventListener('keydown', onMessageCloseKeydown);
+    // вставляем секциюю с сообщением
+    document.body.querySelector('main').insertAdjacentElement('afterbegin', messageElement);
+    return messageElement;
   }
 
   /**
@@ -306,6 +411,10 @@
     return '';
   }
 
+  /**
+   * Сбрасываем настройки в состояние по умолчанию
+   * @param {Boolean} clearUploadFileInputValue если true - сбрасываем значение поля выбора файла
+   */
   function setDefaultState(clearUploadFileInputValue) {
     currentFilterId = window.settings.DEFAULT_EFFECT;
     setFilterClass(window.settings.DEFAULT_EFFECT);
@@ -376,5 +485,7 @@
   if (uploadFileInput) {
     uploadFileInput.addEventListener('change', onUploadFileInputChange);
   }
+  // Добавляем обработчик отправки формы
+  formUploadImage.addEventListener('submit', onSetupFormSubmit);
 
 })();
