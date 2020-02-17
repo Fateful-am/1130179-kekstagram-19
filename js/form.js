@@ -162,20 +162,30 @@
 
   /**
    * Обработка события удачной отправки данных на сервер
+   * @return {Node} возвращает секцию с сообщением
    */
   function onSuccessSaveData() {
-    // window.index.closeSetupDialogActions();
     closeImgUploadForm();
     messageSection = uploadMessage('success', 'Изображение успешно загружено');
+
+    return messageSection;
   }
 
   /**
    * Обработка ошибочного события отправки данных на сервер
    * @param {String} errorMessage Сообщение об ошибке при загрузке данных с сервера
    */
+
+  /**
+   * Обработка ошибочного события отправки данных на сервер
+   * @param {String} errorMessage Сообщение об ошибке при загрузке данных с сервера
+   * @return {Node} возвращает секцию с сообщением
+   */
   function onErrorSaveData(errorMessage) {
     closeImgUploadForm();
     messageSection = uploadMessage('error', errorMessage);
+
+    return messageSection;
   }
 
   /**
@@ -200,13 +210,6 @@
     document.removeEventListener('keydown', onMessageCloseKeydown);
     // Удаляем секцию с сообщением
     messageSection.remove();
-  }
-
-  /**
-   * Добавляем обработчики закрытия окна сообщения по клику по кнопке
-   */
-  function onMessageCloseButtonClick() {
-    closeMessage();
   }
 
   /**
@@ -251,13 +254,14 @@
 
     // Добавляем обработчики закрытия окна сообщения
     // по клику по кнопке
-    closeMessageButton.addEventListener('click', onMessageCloseButtonClick);
+    closeMessageButton.addEventListener('click', closeMessage);
     // по клику вне окна сообщения
     document.addEventListener('click', onMessageCloseClick);
     // по нажатию Esc
     document.addEventListener('keydown', onMessageCloseKeydown);
     // вставляем секциюю с сообщением
     document.body.querySelector('main').insertAdjacentElement('afterbegin', messageElement);
+
     return messageElement;
   }
 
