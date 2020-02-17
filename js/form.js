@@ -36,8 +36,6 @@
   var effectLevelValue = imgUploadOverlay.querySelector('.effect-level__value');
   // текущий выбранный фильтр
   var currentFilterId;
-  // Элемент с сообщением отправки формы
-  var messageSection;
   // Кнопка закрытия диалога с сообщением
   var closeMessageButton;
 
@@ -162,13 +160,10 @@
 
   /**
    * Обработка события удачной отправки данных на сервер
-   * @return {Node} возвращает секцию с сообщением
    */
   function onSuccessSaveData() {
     closeImgUploadForm();
-    messageSection = uploadMessage('success', 'Изображение успешно загружено');
-
-    return messageSection;
+    uploadMessage('success', 'Изображение успешно загружено');
   }
 
   /**
@@ -179,13 +174,10 @@
   /**
    * Обработка ошибочного события отправки данных на сервер
    * @param {String} errorMessage Сообщение об ошибке при загрузке данных с сервера
-   * @return {Node} возвращает секцию с сообщением
    */
   function onErrorSaveData(errorMessage) {
     closeImgUploadForm();
-    messageSection = uploadMessage('error', errorMessage);
-
-    return messageSection;
+    uploadMessage('error', errorMessage);
   }
 
   /**
@@ -198,6 +190,7 @@
     if (xhrErrorMessage) {
       xhrErrorMessage.remove();
     }
+    // Отпрака данных формы на сервер с колбэками для удачной и не удачной отправки
     window.backend.save(window.settings.FORM_SEND_URL, new FormData(formUploadImage), onSuccessSaveData, onErrorSaveData);
   }
 
@@ -209,7 +202,7 @@
     document.removeEventListener('click', onMessageCloseClick);
     document.removeEventListener('keydown', onMessageCloseKeydown);
     // Удаляем секцию с сообщением
-    messageSection.remove();
+    document.querySelector('#upload-message-section').remove();
   }
 
   /**
@@ -217,7 +210,7 @@
    * @param {Event} evt
    */
   function onMessageCloseClick(evt) {
-    if (evt.target === messageSection) {
+    if (evt.target === document.querySelector('#upload-message-section')) {
       closeMessage();
     }
   }
@@ -239,7 +232,6 @@
    * Клонируем и рендерим сообщение о загрузке файла
    * @param {String} templateId Id шаблона
    * @param {String} infoMessage Сообщение для отображения
-   * @return {Node}
    */
   function uploadMessage(templateId, infoMessage) {
     // Шаблон для сообщения
@@ -248,6 +240,7 @@
       .querySelector('.' + templateId);
     // Клонируем секцию из шаблона
     var messageElement = messageTemplate.cloneNode(true);
+    messageElement.id = 'upload-message-section';
     messageElement.querySelector('.' + templateId + '__title').textContent = infoMessage;
     // Кнопка закрытия сообщения
     closeMessageButton = messageElement.querySelector('.' + templateId + '__button');
@@ -261,8 +254,6 @@
     document.addEventListener('keydown', onMessageCloseKeydown);
     // вставляем секциюю с сообщением
     document.body.querySelector('main').insertAdjacentElement('afterbegin', messageElement);
-
-    return messageElement;
   }
 
   /**
