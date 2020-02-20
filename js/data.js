@@ -4,6 +4,33 @@
  * Модуль, который создаёт данные
  */
 (function () {
+  // секция с фильтрами
+  var filterSection = document.querySelector('.img-filters');
+  // элемент случайный фильтр
+  var randomFilter = filterSection.querySelector('#filter-random');
+  // элемент обсуждаемый фильтр
+  var discussedFilter = filterSection.querySelector('#filter-discussed');
+  // элемент фильтр по умолчанию
+  var defaultFilter = filterSection.querySelector('#filter-default');
+  // последний из запущенных таймеров
+  var lastTimeout;
+
+  // Массив доступных фильтров
+  var filters = [
+    defaultFilter,
+    randomFilter,
+    discussedFilter
+  ];
+
+  // объект с обработчиками клика по фильтрам
+  var filterClick = {
+    'filter-default': showDefaultPictures,
+    'filter-random': showRandomPictures,
+    'filter-discussed': showDiscussedPictures
+  };
+
+  // Данные фотографий загруженные с сервера
+  var picturesFromServer;
 
   /**
    * Возвращает случайное сообщение
@@ -106,11 +133,103 @@
   }
 
   /**
+   * Переключаем текущий фильтр
+   * @param {Element} activeFilter текущий фильтр
+   */
+  function toggleFilter(activeFilter) {
+    // перебираем все фильтры
+    filters.forEach(function (filter) {
+      if (filter === activeFilter) {
+        filter.classList.add('img-filters__button--active');
+        filter.removeEventListener('click', onFilterClick);
+        filter.style.cursor = 'default';
+      } else {
+        filter.classList.remove('img-filters__button--active');
+        filter.addEventListener('click', onFilterClick);
+        filter.style.cursor = 'pointer';
+      }
+    });
+  }
+
+  /**
+   * Обработка клика по фильтру
+   * @param {Event} evt
+   */
+  function onFilterClick(evt) {
+    // переключаем фильтр
+    toggleFilter(evt.target);
+    // сбрасываем таймер при необходимости
+    if (lastTimeout) {
+      window.clearTimeout(lastTimeout);
+    }
+
+    // выставляем новый таймер
+    lastTimeout = window.setTimeout(function () {
+      // фильтруем фотографии
+      filterClick[evt.target.id]();
+    }, window.settings.DEBOUNCE_INTERVAL);
+  }
+
+  /**
+   * Загрузка случайных фотографий
+   */
+  function showRandomPictures() {
+    // копируем оригинал
+    var copiedPictures = picturesFromServer.slice();
+    // массив с случайными фотограциями
+    var randomPictures = [];
+
+    // отбираем случайные фотографии
+    for (var i = 0; i < window.settings.RANDOM_FILTER_COUNT; i++) {
+      randomPictures.push(window.utils.getRandomArraysElement(copiedPictures, true));
+    }
+
+    window.gallery.renderPictures(randomPictures);
+  }
+
+  /**
+   * Загрузка обсуждаемых фотографий
+   */
+  function showDiscussedPictures() {
+    // копируем оригинал
+    var copiedPictures = picturesFromServer.slice();
+    // сортируем по количеству комментариев
+    copiedPictures.sort(function (left, right) {
+      if (right.comments.length > left.comments.length) {
+        return 1;
+      } else if (right.comments.length < left.comments.length) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+
+    window.gallery.renderPictures(copiedPictures);
+  }
+
+  /**
+   * Загрузка всех фотографий с сервера
+   */
+  function showDefaultPictures() {
+    // отрисовываем фотографии с сервера
+    window.gallery.renderPictures(picturesFromServer);
+  }
+
+  /**
    * Обработка успешного события загрузки данных с сервера
    * @param {Array} picturesData Массив магов с сервера
    */
   function onSuccessLoadData(picturesData) {
-    window.gallery.renderPictures(picturesData);
+    // нативные данные с сервера
+    picturesFromServer = picturesData;
+
+    // показываем фильтры
+    filterSection.classList.remove('img-filters--inactive');
+    // навешиваем обработчики клика, нажатия по фильтрам
+    toggleFilter(defaultFilter);
+
+    // Отрисовка всех фотографий с сервера
+    showDefaultPictures();
   }
 
   /**
@@ -130,5 +249,7 @@
 
     return;
   }
+
+  // Загрузка случайных фотографий
   window.gallery.renderPictures(getPhotoDescriptions(window.settings.PHOTO_COUNT));
 })();

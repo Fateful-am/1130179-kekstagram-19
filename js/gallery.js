@@ -21,6 +21,14 @@
       fragment.appendChild(window.picture.renderPicture(photoDescriptionsArray[p]));
     }
 
+    // Очистка предыдущего набора фотографий
+    var pictures = document.querySelector('.pictures');
+    var currentPictures = pictures.querySelectorAll('.picture');
+    // удаляем предыдущий набор
+    currentPictures.forEach(function (value) {
+      value.remove();
+    });
+
     // Вставляем фотографии
     document.querySelector('.pictures').appendChild(fragment);
   }
