@@ -8,19 +8,14 @@
   var filterSection = document.querySelector('.img-filters');
   // элемент случайный фильтр
   var randomFilter = filterSection.querySelector('#filter-random');
-  // элемент обсуждаемый фильтр
-  var discussedFilter = filterSection.querySelector('#filter-discussed');
   // элемент фильтр по умолчанию
   var defaultFilter = filterSection.querySelector('#filter-default');
   // последний из запущенных таймеров
   var lastTimeout;
-
-  // Массив доступных фильтров
-  var filters = [
-    defaultFilter,
-    randomFilter,
-    discussedFilter
-  ];
+  // Форма со списком фильтров
+  var filterForm = document.querySelector('.img-filters__form');
+  // Текущий фильтр
+  var currentFilter;
 
   // объект с обработчиками клика по фильтрам
   var filterClick = {
@@ -133,41 +128,41 @@
   }
 
   /**
-   * Переключаем текущий фильтр
-   * @param {Element} activeFilter текущий фильтр
-   */
-  function toggleFilter(activeFilter) {
-    // перебираем все фильтры
-    filters.forEach(function (filter) {
-      if (filter === activeFilter) {
-        filter.classList.add('img-filters__button--active');
-        filter.removeEventListener('click', onFilterClick);
-        filter.style.cursor = 'default';
-      } else {
-        filter.classList.remove('img-filters__button--active');
-        filter.addEventListener('click', onFilterClick);
-        filter.style.cursor = 'pointer';
-      }
-    });
-  }
-
-  /**
    * Обработка клика по фильтру
    * @param {Event} evt
    */
   function onFilterClick(evt) {
-    // переключаем фильтр
-    toggleFilter(evt.target);
-    // сбрасываем таймер при необходимости
-    if (lastTimeout) {
-      window.clearTimeout(lastTimeout);
-    }
+    // кликнутый элемент
+    var clickedElement = evt.target;
 
-    // выставляем новый таймер
-    lastTimeout = window.setTimeout(function () {
-      // фильтруем фотографии
-      filterClick[evt.target.id]();
-    }, window.settings.DEBOUNCE_INTERVAL);
+    // если клик только по "случайному" активному фильтру то перегенерируем, иначе ничего не делаем
+    if (clickedElement.classList.contains('img-filters__button--active') && clickedElement === randomFilter) {
+      clickedElement.style.cursor = 'pointer';
+      showRandomPictures();
+    } else {
+      // убираем активность с текущего фильтра
+      currentFilter.classList.remove('img-filters__button--active');
+      currentFilter.style.cursor = 'pointer';
+      // делаем активным кликнутый
+      clickedElement.classList.add('img-filters__button--active');
+      // обработка "случайного" фильтра
+      if (clickedElement !== randomFilter) {
+        clickedElement.style.cursor = 'default';
+      }
+
+      // переназначаем текущий фильтр
+      currentFilter = clickedElement;
+      // сбрасываем таймер при необходимости
+      if (lastTimeout) {
+        window.clearTimeout(lastTimeout);
+      }
+
+      // выставляем новый таймер
+      lastTimeout = window.setTimeout(function () {
+        // фильтруем фотографии
+        filterClick[clickedElement.id]();
+      }, window.settings.DEBOUNCE_INTERVAL);
+    }
   }
 
   /**
@@ -226,9 +221,11 @@
     // показываем фильтры
     filterSection.classList.remove('img-filters--inactive');
     // навешиваем обработчики клика, нажатия по фильтрам
-    toggleFilter(defaultFilter);
+    filterForm.addEventListener('click', onFilterClick);
 
     // Отрисовка всех фотографий с сервера
+    defaultFilter.style.cursor = 'default';
+    currentFilter = defaultFilter;
     showDefaultPictures();
   }
 
