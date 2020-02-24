@@ -88,7 +88,31 @@
 
       return;
     }
-    openImgUploadForm();
+    // первый из списка файлов
+    var file = uploadFileInput.files[0];
+    // Имя файла
+    var fileName = file.name.toLowerCase();
+    // проверка по расширению файла
+    var matches = window.settings.FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+
+    if (matches) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', function () {
+        // Каринка для отрисовки
+        var imgElement = imgUploadPreview.querySelector('IMG');
+        if (imgElement) {
+          imgElement.src = reader.result;
+        }
+
+        // Показываем форму предварительного просмотра
+        openImgUploadForm();
+      });
+
+      reader.readAsDataURL(file);
+    }
   }
 
   /**
@@ -275,7 +299,7 @@
    */
   function setFilterClass(filterClassName) {
     // Удаление всех лишних классов (если таковые устновлены), кроме установленного в разметке по умолчанию
-    for (var i = 1; i < imgUploadPreview.className.length; i++) {
+    for (var i = 1; i < imgUploadPreview.classList.length; i++) {
       imgUploadPreview.classList.remove(imgUploadPreview.classList[1]);
     }
 
@@ -295,7 +319,7 @@
    */
   function setFilterValue(filterValue) {
     if (currentFilterId === window.settings.DEFAULT_EFFECT) {
-      imgUploadPreview.style.fiter = '';
+      imgUploadPreview.style.filter = '';
     } else {
       imgUploadPreview.style.filter = filterOption[currentFilterId].filter(filterValue);
     }
@@ -412,8 +436,7 @@
    */
   function setDefaultState(clearUploadFileInputValue) {
     currentFilterId = window.settings.DEFAULT_EFFECT;
-    setFilterClass(window.settings.DEFAULT_EFFECT);
-    currentFilterId = window.settings.DEFAULT_EFFECT;
+    setFilterClass(currentFilterId);
     // слайдер на 100%
     setFilterValue(1);
     // По умолчанию выставляем без фильтров
