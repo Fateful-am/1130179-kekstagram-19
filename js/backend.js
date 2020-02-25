@@ -2,6 +2,10 @@
 
 (function () {
 
+  var HTTP_OK = 200;
+  var HTTP_BAD_REQUEST = 400;
+  var HTTP_UNAUTHORIZED = 401;
+  var HTTP_NOT_FOUND = 404;
   // Интерфейс модуля
   window.backend = {
     load: load, // Загрузка данных
@@ -18,17 +22,17 @@
       // для хранения текста ошибки при ее возникновении
       var error;
       switch (xhr.status) {
-        case 200:
+        case HTTP_OK:
           onSuccess(xhr.response);
           break;
 
-        case 400:
+        case HTTP_BAD_REQUEST:
           error = 'Неверный запрос';
           break;
-        case 401:
+        case HTTP_UNAUTHORIZED:
           error = 'Пользователь не авторизован';
           break;
-        case 404:
+        case HTTP_NOT_FOUND:
           error = 'Ничего не найдено';
           break;
 

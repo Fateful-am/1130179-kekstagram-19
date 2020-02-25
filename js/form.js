@@ -309,8 +309,6 @@
     }
     imgUploadPreview.classList.add(filterOption[filterClassName].previewClass);
     window.utils.visibleToggle(fieldSetEffectLevel, true);
-
-    return;
   }
 
   /**

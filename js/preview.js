@@ -23,7 +23,7 @@
     window.utils.processEscAction(evt, closeBigPicture);
     // Закрытие окна по Enter на элементе
     if (evt.target === pictureCancel) {
-      window.utils.processEnterAction(evt, closeBigPicture);
+      window.utils.processEnterAction(evt, closeBigPicture, true);
     }
   }
 
@@ -86,13 +86,13 @@
     // url фотографии
     bigPicture.querySelector('img').src = photoDescription.url;
     // альтернативное описание фотографии
-    bigPicture.querySelector('img').alt = descriptionPart;
+    bigPicture.querySelector('img').alt = descriptionPart[0];
     // Кол-во лайков
     bigPicture.querySelector('.likes-count').textContent = photoDescription.likes;
     // Кол-во комментариев
     bigPicture.querySelector('.comments-count').textContent = photoDescription.comments.length.toString();
     // Описание фоторафии
-    bigPicture.querySelector('.social__caption').textContent = descriptionPart;
+    bigPicture.querySelector('.social__caption').textContent = descriptionPart[0];
     // Сохраняем ссылку на массив комментариев
     bigPicture.comments = photoDescription.comments;
 

@@ -138,7 +138,6 @@
     // если клик только по "случайному" активному фильтру то перегенерируем, иначе ничего не делаем
     if (clickedElement.classList.contains('img-filters__button--active') && clickedElement === randomFilter) {
       clickedElement.style.cursor = 'pointer';
-      showRandomPictures();
     } else {
       // убираем активность с текущего фильтра
       currentFilter.classList.remove('img-filters__button--active');
@@ -152,17 +151,19 @@
 
       // переназначаем текущий фильтр
       currentFilter = clickedElement;
-      // сбрасываем таймер при необходимости
-      if (lastTimeout) {
-        window.clearTimeout(lastTimeout);
-      }
-
-      // выставляем новый таймер
-      lastTimeout = window.setTimeout(function () {
-        // фильтруем фотографии
-        filterClick[clickedElement.id]();
-      }, window.settings.DEBOUNCE_INTERVAL);
     }
+
+    // сбрасываем таймер при необходимости
+    if (lastTimeout) {
+      window.clearTimeout(lastTimeout);
+    }
+
+    // выставляем новый таймер
+    lastTimeout = window.setTimeout(function () {
+      // фильтруем фотографии
+      filterClick[clickedElement.id]();
+    }, window.settings.DEBOUNCE_INTERVAL);
+
   }
 
   /**
