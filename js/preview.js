@@ -54,8 +54,8 @@
     socialPicture.classList.add('social__picture');
     socialPicture.src = comment.avatar;
     socialPicture.alt = comment.name;
-    socialPicture.width = 35;
-    socialPicture.height = 35;
+    socialPicture.width = window.settings.AVATAR_IMAGE_WIDTH;
+    socialPicture.height = window.settings.AVATAR_IMAGE_HEIGHT;
     socialComment.appendChild(socialPicture);
     // Текст комментария
     var socialText = document.createElement('p');
@@ -83,10 +83,12 @@
     // Разделяем описания картинок от хэштэгов
     var descriptionPart = photoDescription.description.match(/(?:[^#])*/);
     // Заменяем информацию для выбранной фотографии
+    // img для фотографии
+    var imgForPhoto = bigPicture.querySelector('img');
     // url фотографии
-    bigPicture.querySelector('img').src = photoDescription.url;
+    imgForPhoto.src = photoDescription.url;
     // альтернативное описание фотографии
-    bigPicture.querySelector('img').alt = descriptionPart[0];
+    imgForPhoto.alt = descriptionPart[0];
     // Кол-во лайков
     bigPicture.querySelector('.likes-count').textContent = photoDescription.likes;
     // Кол-во комментариев
@@ -127,9 +129,9 @@
     // Фрагмент для вставки
     var fragment = document.createDocumentFragment();
     // Генерация комментариев
-    for (var li = 0; li < newCommentsForShow.length; li++) {
-      fragment.appendChild(renderComment(socialComments, newCommentsForShow[li]));
-    }
+    newCommentsForShow.forEach(function (item) {
+      fragment.appendChild(renderComment(socialComments, item));
+    });
 
     // Вставляем блок с комментариями
     socialComments.appendChild(fragment);

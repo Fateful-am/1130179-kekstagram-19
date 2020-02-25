@@ -17,9 +17,10 @@
   function renderPictures(photoDescriptionsArray) {
     // Фрагмент для вставки
     var fragment = document.createDocumentFragment();
-    for (var p = 0; p < photoDescriptionsArray.length; p++) {
-      fragment.appendChild(window.picture.renderPicture(photoDescriptionsArray[p]));
-    }
+
+    photoDescriptionsArray.forEach(function (item) {
+      fragment.appendChild(window.picture.render(item));
+    });
 
     // Очистка предыдущего набора фотографий
     var pictures = document.querySelector('.pictures');
@@ -30,7 +31,7 @@
     });
 
     // Вставляем фотографии
-    document.querySelector('.pictures').appendChild(fragment);
+    pictures.appendChild(fragment);
   }
 
 })();
